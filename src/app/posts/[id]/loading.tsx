@@ -3,8 +3,8 @@ import { SiteHeader } from "@/components/site-header";
 export default function PostDetailLoading() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
-      <SiteHeader active="list" />
-      <main className="mx-auto w-full max-w-[840px] pb-16 pt-9">
+      <SiteHeader active="projects" />
+      <main className="mx-auto w-full max-w-[900px] pb-16 pt-9">
         <div className="h-4 w-28 animate-pulse rounded bg-[#e2e8f0]" />
         <div className="mt-5 min-h-[640px] animate-pulse rounded-lg border border-[#e2e8f0] bg-white px-9 py-8">
           <div className="h-6 w-36 rounded bg-[#eaf2ff]" />
