@@ -8,7 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { TechnologyInput } from "@/components/technology-input";
 import { EmptyState, PostCard, TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
-import type { PostStatus } from "@/data/demo-data";
+import type { PostStatus } from "@/data/models";
 
 type StatusFilter = "all" | PostStatus;
 

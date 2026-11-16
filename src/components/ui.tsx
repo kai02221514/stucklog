@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Post } from "@/data/demo-data";
+import type { Post } from "@/data/models";
 
 export function TechnologyTag({ children }: { children: React.ReactNode }) {
   return <span className="inline-flex rounded-full border border-[#cfe0ff] bg-[#f5f9ff] px-2.5 py-1 text-xs font-medium text-[#1d4ed8]">{children}</span>;

@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
-import type { Post, Project } from "@/data/demo-data";
+import type { Post, Project } from "@/data/models";
 import { getPool } from "@/lib/server/db";
 
 type ProjectRow = RowDataPacket & {

@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
-import type { Post, Project } from "@/data/demo-data";
+import type { Post, Project } from "@/data/models";
 
 type NewProject = Pick<Project, "name" | "description" | "technologies">;
 type NewPost = Pick<Post, "projectId" | "title" | "content" | "technologies">;
