@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 USE stucklog;
 
 INSERT INTO projects (id, name, description) VALUES

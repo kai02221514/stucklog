@@ -24,6 +24,7 @@ function getConnectionOptions() {
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     charset: "utf8mb4",
+    timezone: "Z",
     connectionLimit: 10,
     enableKeepAlive: true,
   };
