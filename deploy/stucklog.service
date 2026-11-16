@@ -1,0 +1,16 @@
+[Unit]
+Description=StuckLog Next.js application
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/home/ec2-user/stucklog
+Environment=NODE_ENV=production
+EnvironmentFile=/home/ec2-user/stucklog/.env.production
+ExecStart=/usr/bin/npm start
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

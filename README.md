@@ -1,6 +1,19 @@
-# StuckLog Project MVP Demo
+# StuckLog Project MVP
 
-Figmaで設計した、プロジェクト単位でつまずきと解決策を共有するWebアプリの操作可能なデモです。Next.js 16、React 19、Tailwind CSSで構成しています。
+プロジェクト単位で技術的なつまずきと解決策を共有するWebアプリです。教材との一致を優先し、Next.jsをEC2上で実行し、データをRDS MySQLへ保存する構成です。
+
+## AWS構成
+
+```text
+ブラウザ → EC2（Next.js / Node.js）→ RDS MySQL
+```
+
+- ホスティング・API: Amazon EC2上のNext.js
+- データ保存: Amazon RDS for MySQL
+- ネットワーク: Amazon VPCとセキュリティグループ
+- EC2の操作: AWS Systems Manager Session Managerを推奨
+
+この構成は、教材のDay 2「EC2・VPC」とDay 3「RDS・Node.js CRUD」に対応します。
 
 ## できること
 
@@ -10,11 +23,28 @@ Figmaで設計した、プロジェクト単位でつまずきと解決策を共
 - プロジェクトの使用技術の編集
 - 全プロジェクトを横断した解決済みナレッジ検索
 - プロジェクト・技術によるナレッジの絞り込み
-- 空の状態、検索結果0件、入力エラーの表示
+- RDS MySQLへの永続保存
+- 読み込み・保存失敗時のエラー表示と再試行
 
-## 起動方法
+## ローカル起動
+
+MySQL 8.0互換のデータベースを用意し、テーブルと初期データを作成します。
 
 ```bash
+mysql -u root -p < database/schema.sql
+mysql -u root -p stucklog < database/seed.sql
+```
+
+環境変数を作成します。
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` の接続情報をローカルMySQLに合わせて変更し、アプリを起動します。
+
+```bash
+npm install
 npm run dev
 ```
 
@@ -23,23 +53,27 @@ npm run dev
 ## 主な画面
 
 - `/`: プロジェクト一覧・プロジェクト作成
-- `/projects/aws-training`: プロジェクト内の投稿一覧
-- `/projects/aws-training/posts/new`: 新規投稿
-- `/posts/dynamodb-write`: 投稿詳細・編集・解決済み登録
+- `/projects/[projectId]`: プロジェクト内の投稿一覧
+- `/projects/[projectId]/posts/new`: 新規投稿
+- `/posts/[id]`: 投稿詳細・編集・解決済み登録
 - `/knowledge`: 全プロジェクト横断の解決済みナレッジ
 
-## デモとして置き換えている部分
+## API
 
-AWSへ接続する前段階のため、データはブラウザのメモリ上で管理しています。該当箇所には `DEMO:` で始まるコメントを記載しています。
+- `GET /api/projects`: プロジェクト一覧
+- `POST /api/projects`: プロジェクト作成
+- `PATCH /api/projects/[projectId]`: 使用技術更新
+- `GET /api/posts`: 投稿一覧
+- `POST /api/posts`: 投稿作成
+- `PATCH /api/posts/[id]`: 投稿編集・解決済み登録
 
-- `src/data/demo-data.ts`: DynamoDBから取得する代わりの初期データ
-- `src/lib/demo-store.tsx`: API経由のCRUD処理の代わりとなるReact state
+## AWSへの配置
 
-画面遷移、検索、絞り込み、タグ追加、投稿・編集・解決済みへの更新は実際に動作します。ページを再読み込みするとデモデータへ戻ります。
+VPC、セキュリティグループ、EC2、RDSの具体的な作成・確認手順は [AWS構築手順](docs/aws-deployment.md) を参照してください。
 
-## AWS接続時の想定
+## 検証
 
-- ホスティング: AWS Amplify Hosting
-- API: API Gateway + Lambda
-- データ保存: DynamoDB
-- 認証を追加する場合: Amazon Cognito
+```bash
+npm run lint
+npm run build
+```
