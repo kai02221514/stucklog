@@ -7,26 +7,35 @@ import { Modal } from "@/components/modal";
 import { SiteHeader } from "@/components/site-header";
 import { TechnologyInput } from "@/components/technology-input";
 import { TechnologyTag } from "@/components/ui";
-import { useDemoStore } from "@/lib/demo-store";
+import { useAppStore } from "@/lib/app-store";
 
 export default function ProjectsPage() {
   const router = useRouter();
-  const { projects, posts, createProject } = useDemoStore();
+  const { projects, posts, createProject } = useAppStore();
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!name.trim() || technologies.length === 0) {
       setError("プロジェクト名と使用技術を入力してください。");
       return;
     }
-    const id = createProject({ name: name.trim(), description: description.trim() || "プロジェクトの記録", technologies });
-    setShowCreate(false);
-    router.push(`/projects/${id}`);
+    setSubmitting(true);
+    setError("");
+    try {
+      const id = await createProject({ name: name.trim(), description: description.trim() || "プロジェクトの記録", technologies });
+      setShowCreate(false);
+      router.push(`/projects/${id}`);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "プロジェクトを作成できませんでした。");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +65,7 @@ export default function ProjectsPage() {
         <label className="block"><span className="mb-2 block text-sm font-medium text-[#334155]">説明　任意</span><textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="プロジェクトの目的を入力" className="h-[86px] w-full resize-none rounded-md border border-[#cbd5e1] px-4 py-3 text-sm outline-none placeholder:text-[#64748b] focus:border-[#2563eb] focus:ring-2 focus:ring-[#dbeafe]" /></label>
         <div><p className="mb-2 text-sm font-medium text-[#334155]">使用技術　必須</p><TechnologyInput value={technologies} onChange={setTechnologies} /></div>
         {error ? <p role="alert" className="text-sm text-[#b91c1c]">{error}</p> : null}
-        <div className="flex justify-end gap-3"><button type="button" onClick={() => setShowCreate(false)} className="h-[42px] rounded-md border border-[#cbd5e1] bg-white px-4 text-sm font-medium text-[#334155]">キャンセル</button><button type="submit" className="h-[42px] rounded-md bg-[#2563eb] px-4 text-sm font-medium text-white">作成する</button></div>
+        <div className="flex justify-end gap-3"><button type="button" onClick={() => setShowCreate(false)} disabled={submitting} className="h-[42px] rounded-md border border-[#cbd5e1] bg-white px-4 text-sm font-medium text-[#334155] disabled:opacity-50">キャンセル</button><button type="submit" disabled={submitting} className="h-[42px] rounded-md bg-[#2563eb] px-4 text-sm font-medium text-white disabled:opacity-50">{submitting ? "作成中..." : "作成する"}</button></div>
       </form></Modal> : null}
     </div>
   );

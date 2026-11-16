@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { DemoStoreProvider } from "@/lib/demo-store";
+import { AppStoreProvider } from "@/lib/app-store";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
       <body>
-        <DemoStoreProvider>{children}</DemoStoreProvider>
+        <AppStoreProvider>{children}</AppStoreProvider>
       </body>
     </html>
   );

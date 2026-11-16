@@ -4,10 +4,10 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState, ProjectTag, TechnologyTag } from "@/components/ui";
-import { useDemoStore } from "@/lib/demo-store";
+import { useAppStore } from "@/lib/app-store";
 
 export default function KnowledgePage() {
-  const { posts, projects } = useDemoStore();
+  const { posts, projects } = useAppStore();
   const [query, setQuery] = useState("");
   const [projectId, setProjectId] = useState("all");
   const [technology, setTechnology] = useState("all");
