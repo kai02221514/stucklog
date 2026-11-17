@@ -15,7 +15,6 @@ export function SiteHeader({ active = "projects" }: SiteHeaderProps) {
           <Link href="/" className={navClass(active === "projects")}>プロジェクト</Link>
           <Link href="/knowledge" className={navClass(active === "knowledge")}>解決済みナレッジ</Link>
         </nav>
-        <span className="ml-auto text-[13px] font-medium text-[#475569]">北田 大海</span>
       </div>
     </header>
   );
