@@ -120,7 +120,7 @@ export default function KnowledgePage() {
                   <div className="flex flex-wrap gap-2">{project ? <ProjectTag>{project.name}</ProjectTag> : null}{post.technologies.map((item) => <TechnologyTag key={item}>{item}</TechnologyTag>)}</div>
                   <h2 className="text-[17px] font-bold">{post.title}</h2>
                   <p className="line-clamp-1 text-sm leading-6 text-[#475569]">解決メモ： {post.resolution}</p>
-                  <p className="mt-auto text-xs text-[#64748b]">{post.author}　・　{post.createdLabel}</p>
+                  <p className="mt-auto text-xs text-[#64748b]">{post.createdLabel}</p>
                 </Link>;
               })}
             </div>
