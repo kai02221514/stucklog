@@ -35,9 +35,9 @@ function NewPostPageContent() {
     }
   };
 
-  return <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]"><SiteHeader /><main className="mx-auto w-full max-w-[840px] pb-12 pt-9"><p className="text-xs text-[#64748b]">{project.name}　/　新しく投稿</p><div className="mt-5"><h1 className="text-[28px] font-bold">新しく投稿</h1><p className="mt-1.5 text-sm text-[#64748b]">{project.name}で発生したつまずきを記録します。</p></div>
+  return <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]"><SiteHeader /><main className="mx-auto w-full max-w-[840px] pb-12 pt-9">
     <form onSubmit={submit} className="mt-5 space-y-5 rounded-lg border border-[#e2e8f0] bg-white px-8 py-[26px]">
-      <label className="block"><span className="mb-2 block text-sm font-medium text-[#334155]">プロジェクト</span><input value={project.name} readOnly className="h-11 w-full rounded-md border border-[#cbd5e1] bg-[#f8fafc] px-4 text-sm text-[#64748b]" /></label>
+      <h1 className="text-2xl font-bold text-[#0f172a]">{project.name}</h1>
       <label className="block"><span className="mb-2 block text-sm font-medium text-[#334155]">タイトル　必須</span><input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="例：EC2からRDSへ接続できない" className="h-11 w-full rounded-md border border-[#cbd5e1] px-4 text-sm outline-none placeholder:text-[#64748b] focus:border-[#2563eb] focus:ring-2 focus:ring-[#dbeafe]" autoFocus /></label>
       <div><p className="mb-2 text-sm font-medium text-[#334155]">技術タグ　必須</p><TechnologyInput value={technologies} onChange={setTechnologies} helper="プロジェクトの使用技術から選ぶか、新しく追加できます" /></div>
       <label className="block"><span className="mb-2 block text-sm font-medium text-[#334155]">内容　必須</span><textarea value={content} onChange={(event) => setContent(event.target.value)} placeholder="発生したこと、試したこと、分かったことを記録してください" className="h-[170px] w-full resize-none rounded-md border border-[#cbd5e1] px-4 py-3 text-sm outline-none placeholder:text-[#64748b] focus:border-[#2563eb] focus:ring-2 focus:ring-[#dbeafe]" /></label>
