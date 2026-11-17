@@ -78,3 +78,5 @@ VPC、セキュリティグループ、EC2、RDSの具体的な作成・確認�
 npm run lint
 npm run build
 ```
+
+セキュリティアクセスログの仕様、プライバシー方針、User-Agent別の検証方法は[セキュリティアクセスログ調査](docs/security-logging.md)を参照してください。
