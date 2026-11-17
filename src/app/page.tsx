@@ -52,7 +52,7 @@ export default function ProjectsPage() {
           const openCount = projectPosts.filter((post) => post.status === "open").length;
           const resolvedCount = projectPosts.length - openCount;
           return <Link key={project.id} href={`/projects/${project.id}`} className="group flex h-[164px] flex-col gap-2.5 rounded-lg border border-[#e2e8f0] bg-white px-6 py-5 transition hover:border-[#bfdbfe] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]">
-            <div className="flex items-center gap-3"><h2 className="text-lg font-bold">{project.name}</h2><span className="ml-auto text-xs font-medium text-[#c2410c]">未解決 {openCount}件</span><span className="text-xs font-medium text-[#047857]">解決済み {resolvedCount}件</span><span className="text-[13px] font-medium text-[#1d4ed8]">開く</span></div>
+            <div className="flex items-center gap-3"><h2 className="text-lg font-bold">{project.name}</h2><span className="ml-auto text-xs font-medium text-[#c2410c]">未解決 {openCount}件</span><span className="text-xs font-medium text-[#047857]">解決済み {resolvedCount}件</span></div>
             <p className="text-sm leading-6 text-[#475569]">{project.description}</p>
             <div className="flex gap-2">{project.technologies.map((technology) => <TechnologyTag key={technology}>{technology}</TechnologyTag>)}</div>
             <p className="mt-auto text-xs text-[#64748b]">最終更新 {project.updatedLabel}</p>
