@@ -1,65 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
+import { FilterSelect, type SelectOption } from "@/components/filter-select";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState, ProjectTag, TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
 
 const PAGE_SIZE = 5;
 
-type SelectOption = { label: string; value: string };
-
 function ChevronIcon({ open = false }: { open?: boolean }) {
   return (
     <svg aria-hidden="true" viewBox="0 0 20 20" className={`size-4 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} fill="none">
       <path d="m6 8 4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
-  );
-}
-
-function FilterSelect({ ariaLabel, options, value, onChange }: { ariaLabel: string; options: SelectOption[]; value: string; onChange: (value: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const selected = options.find((option) => option.value === value) ?? options[0];
-
-  useEffect(() => {
-    if (!open) return;
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("mousedown", closeOnOutsideClick);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [open]);
-
-  return (
-    <div ref={rootRef} className="relative min-w-0 flex-1">
-      <button
-        type="button"
-        aria-label={ariaLabel}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((current) => !current)}
-        className="flex h-11 w-full items-center justify-between gap-3 rounded-md border border-[#cbd5e1] bg-white px-4 text-left text-sm text-[#475569] outline-none transition hover:border-[#94a3b8] focus-visible:border-[#2563eb] focus-visible:ring-2 focus-visible:ring-[#dbeafe]"
-      >
-        <span className="min-w-0 truncate">{selected.label}</span><ChevronIcon open={open} />
-      </button>
-      {open ? (
-        <div role="listbox" aria-label={ariaLabel} className="absolute left-0 top-[calc(100%+6px)] z-20 min-w-full overflow-hidden rounded-lg border border-[#e2e8f0] bg-white p-1.5 shadow-[0_16px_36px_rgba(15,23,42,0.14)]">
-          {options.map((option) => {
-            const isSelected = option.value === value;
-            return <button key={option.value} type="button" role="option" aria-selected={isSelected} onClick={() => { onChange(option.value); setOpen(false); }} className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm transition ${isSelected ? "bg-[#eff6ff] font-medium text-[#1d4ed8]" : "text-[#334155] hover:bg-[#f8fafc]"}`}>{option.label}</button>;
-          })}
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -87,11 +41,11 @@ export default function KnowledgePage() {
   const visibleResults = results.slice((displayedPage - 1) * PAGE_SIZE, displayedPage * PAGE_SIZE);
 
   const projectOptions = useMemo<SelectOption[]>(() => [
-    { value: "all", label: "プロジェクト" },
+    { value: "all", label: "すべて" },
     ...projects.map((project) => ({ value: project.id, label: project.name })),
   ], [projects]);
   const technologyOptions = useMemo<SelectOption[]>(() => [
-    { value: "all", label: "技術" },
+    { value: "all", label: "すべて" },
     ...technologies.map((item) => ({ value: item, label: item })),
   ], [technologies]);
 
@@ -101,8 +55,8 @@ export default function KnowledgePage() {
       <main className="mx-auto w-full max-w-[1120px] pb-16 pt-10">
         <div className="mt-5 flex gap-3">
           <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1); }} placeholder="タイトル・解決メモ・技術タグを検索" className="h-11 w-[680px] rounded-md border border-[#cbd5e1] bg-white px-4 text-sm outline-none placeholder:text-[#64748b] focus:border-[#2563eb] focus:ring-2 focus:ring-[#dbeafe]" />
-          <div className="flex w-[210px]"><FilterSelect ariaLabel="プロジェクトで絞り込む" options={projectOptions} value={projectId} onChange={(value) => { setProjectId(value); setCurrentPage(1); }} /></div>
-          <div className="flex w-[206px]"><FilterSelect ariaLabel="技術で絞り込む" options={technologyOptions} value={technology} onChange={(value) => { setTechnology(value); setCurrentPage(1); }} /></div>
+          <div className="flex w-[210px]"><FilterSelect label="プロジェクト" options={projectOptions} value={projectId} onChange={(value) => { setProjectId(value); setCurrentPage(1); }} /></div>
+          <div className="flex w-[206px]"><FilterSelect label="技術" options={technologyOptions} value={technology} onChange={(value) => { setTechnology(value); setCurrentPage(1); }} /></div>
         </div>
         <div className="mt-5 flex items-center gap-2">
           <p className="text-[13px] font-medium leading-none text-[#475569]">{results.length}件</p>
