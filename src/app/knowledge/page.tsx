@@ -116,7 +116,7 @@ export default function KnowledgePage() {
             <div className="mt-5 flex flex-col gap-3">
               {visibleResults.map((post) => {
                 const project = projects.find((item) => item.id === post.projectId);
-                return <Link key={post.id} href={`/posts/${post.id}`} className="flex min-h-[168px] flex-col gap-[9px] rounded-lg border border-[#e2e8f0] bg-white px-[22px] py-[18px] transition hover:border-[#bfdbfe] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]">
+                return <Link key={post.id} href={`/posts/${post.id}?from=knowledge`} className="flex min-h-[168px] flex-col gap-[9px] rounded-lg border border-[#e2e8f0] bg-white px-[22px] py-[18px] transition hover:border-[#bfdbfe] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb]">
                   <div className="flex flex-wrap gap-2">{project ? <ProjectTag>{project.name}</ProjectTag> : null}{post.technologies.map((item) => <TechnologyTag key={item}>{item}</TechnologyTag>)}</div>
                   <h2 className="text-[17px] font-bold">{post.title}</h2>
                   <p className="line-clamp-1 text-sm leading-6 text-[#475569]">解決メモ： {post.resolution}</p>

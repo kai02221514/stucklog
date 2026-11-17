@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState, type FormEvent } from "react";
 import { Modal } from "@/components/modal";
 import { SiteHeader } from "@/components/site-header";
@@ -11,9 +11,11 @@ import { useAppStore } from "@/lib/app-store";
 
 function PostDetailPageContent() {
   const { id } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
   const { posts, projects, updatePost, resolvePost } = useAppStore();
   const post = posts.find((item) => item.id === id);
   const project = projects.find((item) => item.id === post?.projectId);
+  const fromKnowledge = searchParams.get("from") === "knowledge";
   const [editing, setEditing] = useState(false);
   const [resolving, setResolving] = useState(false);
   const [title, setTitle] = useState(post?.title ?? "");
@@ -23,13 +25,16 @@ function PostDetailPageContent() {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  if (!post || !project) return <div className="min-h-screen bg-[#f8fafc]"><SiteHeader /><main className="mx-auto max-w-[900px] py-16"><div className="rounded-lg border border-[#e2e8f0] bg-white px-9 py-20 text-center"><h1 className="text-lg font-bold">投稿が見つかりません</h1><Link href="/" className="mt-4 inline-block text-sm font-medium text-[#1d4ed8]">プロジェクト一覧へ戻る</Link></div></main></div>;
+  if (!post || !project) return <div className="min-h-screen bg-[#f8fafc]"><SiteHeader /><main className="mx-auto max-w-[900px] py-16"><div className="rounded-lg border border-[#e2e8f0] bg-white px-9 py-20 text-center"><h1 className="text-lg font-bold">投稿が見つかりません</h1><Link href={fromKnowledge ? "/knowledge" : "/"} className="mt-4 inline-block text-sm font-medium text-[#1d4ed8]">{fromKnowledge ? "解決済みナレッジに戻る" : "プロジェクト一覧へ戻る"}</Link></div></main></div>;
 
   const openEdit = () => { setTitle(post.title); setContent(post.content); setTechnologies(post.technologies); setError(""); setEditing(true); };
   const submitEdit = async (event: FormEvent) => { event.preventDefault(); if (!title.trim() || !content.trim() || technologies.length === 0) { setError("すべての必須項目を入力してください。"); return; } setSaving(true); setError(""); try { await updatePost(post.id, { title: title.trim(), content: content.trim(), technologies }); setEditing(false); } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "投稿を保存できませんでした。"); } finally { setSaving(false); } };
   const submitResolution = async (event: FormEvent) => { event.preventDefault(); if (!resolution.trim()) { setError("解決メモを入力してください。"); return; } setSaving(true); setError(""); try { await resolvePost(post.id, resolution.trim()); setResolving(false); setResolution(""); } catch (saveError) { setError(saveError instanceof Error ? saveError.message : "解決メモを保存できませんでした。"); } finally { setSaving(false); } };
 
-  return <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]"><SiteHeader /><main className="mx-auto w-full max-w-[900px] pb-16 pt-8"><Link href={`/projects/${project.id}`} className="text-[13px] font-medium text-[#1d4ed8]">← {project.name}の投稿一覧に戻る</Link>
+  const backHref = fromKnowledge ? "/knowledge" : `/projects/${project.id}`;
+  const backLabel = fromKnowledge ? "解決済みナレッジに戻る" : `${project.name}の投稿一覧に戻る`;
+
+  return <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]"><SiteHeader /><main className="mx-auto w-full max-w-[900px] pb-16 pt-8"><Link href={backHref} className="text-[13px] font-medium text-[#1d4ed8]">← {backLabel}</Link>
     <article className="mt-5 min-h-[690px] rounded-lg border border-[#e2e8f0] bg-white px-[34px] pb-[34px] pt-[30px]">
       <div className="flex items-start gap-2"><StatusTag status={post.status} />{post.technologies.map((technology) => <TechnologyTag key={technology}>{technology}</TechnologyTag>)}<div className="ml-auto flex gap-3"><button type="button" onClick={openEdit} className="h-[42px] w-[72px] rounded-lg border border-[#bfdbfe] bg-white text-sm font-medium text-[#1d4ed8]">編集</button>{post.status === "open" ? <button type="button" onClick={() => { setError(""); setResolving(true); }} className="h-[42px] w-40 rounded-md bg-[#2563eb] text-sm font-medium text-white">解決済みにする</button> : null}</div></div>
       <h1 className="mt-5 text-[26px] font-bold">{post.title}</h1><p className="mt-5 text-xs text-[#64748b]">{post.createdLabel}</p><div className="mt-5 border-t border-[#e2e8f0] pt-5"><h2 className="text-[15px] font-bold text-[#334155]">内容</h2><p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#334155]">{post.content}</p></div>
