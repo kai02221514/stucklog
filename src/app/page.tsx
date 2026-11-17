@@ -43,7 +43,6 @@ export default function ProjectsPage() {
       <SiteHeader />
       <main className="mx-auto w-full max-w-[1120px] pb-16 pt-10">
         <div className="flex items-center gap-4">
-          <div><h1 className="text-[28px] font-bold">プロジェクト</h1><p className="mt-1.5 text-sm text-[#64748b]">使用する技術と投稿をプロジェクト単位で整理します。</p></div>
           <button type="button" onClick={() => setShowCreate(true)} className="ml-auto h-[42px] w-[188px] rounded-md bg-[#2563eb] text-sm font-medium text-white hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2">新しいプロジェクト</button>
         </div>
 

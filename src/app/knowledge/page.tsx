@@ -99,7 +99,6 @@ export default function KnowledgePage() {
     <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
       <SiteHeader active="knowledge" />
       <main className="mx-auto w-full max-w-[1120px] pb-16 pt-10">
-        <h1 className="text-[28px] font-bold">解決済みナレッジ</h1>
         <div className="mt-5 flex gap-3">
           <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setCurrentPage(1); }} placeholder="タイトル・解決メモ・技術タグを検索" className="h-11 w-[680px] rounded-md border border-[#cbd5e1] bg-white px-4 text-sm outline-none placeholder:text-[#64748b] focus:border-[#2563eb] focus:ring-2 focus:ring-[#dbeafe]" />
           <div className="flex w-[210px]"><FilterSelect ariaLabel="プロジェクトで絞り込む" options={projectOptions} value={projectId} onChange={(value) => { setProjectId(value); setCurrentPage(1); }} /></div>
