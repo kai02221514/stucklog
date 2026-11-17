@@ -87,11 +87,11 @@ export default function KnowledgePage() {
   const visibleResults = results.slice((displayedPage - 1) * PAGE_SIZE, displayedPage * PAGE_SIZE);
 
   const projectOptions = useMemo<SelectOption[]>(() => [
-    { value: "all", label: "プロジェクト：すべて" },
+    { value: "all", label: "プロジェクト" },
     ...projects.map((project) => ({ value: project.id, label: project.name })),
   ], [projects]);
   const technologyOptions = useMemo<SelectOption[]>(() => [
-    { value: "all", label: "技術：すべて" },
+    { value: "all", label: "技術" },
     ...technologies.map((item) => ({ value: item, label: item })),
   ], [technologies]);
 
