@@ -6,6 +6,7 @@ import { FilterSelect, type SelectOption } from "@/components/filter-select";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState, ProjectTag, TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
+import { formatRelativeUpdateTime } from "@/lib/format-relative-time";
 
 const PAGE_SIZE = 5;
 
@@ -73,7 +74,7 @@ export default function KnowledgePage() {
                   <div className="flex flex-wrap gap-2">{project ? <ProjectTag>{project.name}</ProjectTag> : null}{post.technologies.map((item) => <TechnologyTag key={item}>{item}</TechnologyTag>)}</div>
                   <h2 className="text-[17px] font-bold">{post.title}</h2>
                   <p className="line-clamp-1 text-sm leading-6 text-[#475569]">解決メモ： {post.resolution}</p>
-                  <p className="mt-auto text-xs text-[#64748b]">{post.createdLabel}</p>
+                  <p className="mt-auto text-xs text-[#64748b]">最終更新: {formatRelativeUpdateTime(post.updatedAt)}</p>
                 </Link>;
               })}
             </div>

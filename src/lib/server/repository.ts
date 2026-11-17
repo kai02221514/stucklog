@@ -21,7 +21,11 @@ type PostRow = RowDataPacket & {
   status: Post["status"];
   resolution: string | null;
   author: string;
-  createdAt: Date;
+  updatedAt: Date;
+};
+
+type UpdatedAtRow = RowDataPacket & {
+  updatedAt: Date;
 };
 
 type TechnologyRow = RowDataPacket & {
@@ -33,18 +37,16 @@ export type NewProject = Pick<Project, "name" | "description" | "technologies">;
 export type NewPost = Pick<Post, "projectId" | "title" | "content" | "technologies">;
 export type PostUpdate = Pick<Post, "title" | "content" | "technologies">;
 
-function relativeTime(value: Date | string) {
-  const date = value instanceof Date ? value : new Date(value);
-  const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+function toIsoString(value: Date | string) {
+  return (value instanceof Date ? value : new Date(value)).toISOString();
+}
 
-  if (seconds < 60) return "たった今";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}分前`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}時間前`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "昨日";
-  return `${days}日前`;
+async function findUpdatedAt(connection: PoolConnection, table: "projects" | "posts", id: string) {
+  const [rows] = await connection.query<UpdatedAtRow[]>(
+    `SELECT updated_at AS updatedAt FROM ${table} WHERE id = ?`,
+    [id],
+  );
+  return rows[0] ? toIsoString(rows[0].updatedAt) : null;
 }
 
 function summaryFrom(content: string) {
@@ -91,7 +93,7 @@ export async function listProjects(): Promise<Project[]> {
     name: project.name,
     description: project.description,
     technologies: technologies.get(project.id) ?? [],
-    updatedLabel: relativeTime(project.updatedAt),
+    updatedAt: toIsoString(project.updatedAt),
   }));
 }
 
@@ -112,8 +114,10 @@ export async function createProject(input: NewProject): Promise<Project> {
       id,
       input.technologies,
     );
+    const updatedAt = await findUpdatedAt(connection, "projects", id);
+    if (!updatedAt) throw new Error("作成したプロジェクトの更新日時を取得できませんでした。");
     await connection.commit();
-    return { ...input, id, updatedLabel: "たった今" };
+    return { ...input, id, updatedAt };
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -145,8 +149,9 @@ export async function updateProjectTechnologies(
       projectId,
       technologies,
     );
+    const updatedAt = await findUpdatedAt(connection, "projects", projectId);
     await connection.commit();
-    return true;
+    return updatedAt ?? false;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -159,7 +164,7 @@ export async function listPosts(): Promise<Post[]> {
   const pool = getPool();
   const [postRows] = await pool.query<PostRow[]>(
     `SELECT id, project_id AS projectId, title, content, summary, status,
-      resolution, author, created_at AS createdAt
+      resolution, author, updated_at AS updatedAt
      FROM posts ORDER BY created_at DESC`,
   );
   const [technologyRows] = await pool.query<TechnologyRow[]>(
@@ -177,20 +182,19 @@ export async function listPosts(): Promise<Post[]> {
     status: post.status,
     resolution: post.resolution ?? undefined,
     author: post.author,
-    createdLabel: relativeTime(post.createdAt),
+    updatedAt: toIsoString(post.updatedAt),
   }));
 }
 
 export async function createPost(input: NewPost): Promise<Post> {
   const connection = await getPool().getConnection();
   const id = `post-${randomUUID()}`;
-  const post: Post = {
+  const post: Omit<Post, "updatedAt"> = {
     ...input,
     id,
     summary: summaryFrom(input.content),
     status: "open",
     author: "北田 大海",
-    createdLabel: "たった今",
   };
 
   try {
@@ -208,8 +212,10 @@ export async function createPost(input: NewPost): Promise<Post> {
       id,
       input.technologies,
     );
+    const updatedAt = await findUpdatedAt(connection, "posts", id);
+    if (!updatedAt) throw new Error("作成した投稿の更新日時を取得できませんでした。");
     await connection.commit();
-    return post;
+    return { ...post, updatedAt };
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -224,7 +230,7 @@ export async function updatePost(postId: string, input: PostUpdate) {
   try {
     await connection.beginTransaction();
     const [result] = await connection.execute(
-      "UPDATE posts SET title = ?, content = ?, summary = ? WHERE id = ?",
+      "UPDATE posts SET title = ?, content = ?, summary = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
       [input.title, input.content, summaryFrom(input.content), postId],
     );
     if (!("affectedRows" in result) || result.affectedRows === 0) {
@@ -238,8 +244,9 @@ export async function updatePost(postId: string, input: PostUpdate) {
       postId,
       input.technologies,
     );
+    const updatedAt = await findUpdatedAt(connection, "posts", postId);
     await connection.commit();
-    return true;
+    return updatedAt ?? false;
   } catch (error) {
     await connection.rollback();
     throw error;
@@ -249,9 +256,25 @@ export async function updatePost(postId: string, input: PostUpdate) {
 }
 
 export async function resolvePost(postId: string, resolution: string) {
-  const [result] = await getPool().execute(
-    "UPDATE posts SET status = 'resolved', resolution = ? WHERE id = ?",
-    [resolution, postId],
-  );
-  return "affectedRows" in result && result.affectedRows > 0;
+  const connection = await getPool().getConnection();
+
+  try {
+    await connection.beginTransaction();
+    const [result] = await connection.execute(
+      "UPDATE posts SET status = 'resolved', resolution = ? WHERE id = ?",
+      [resolution, postId],
+    );
+    if (!("affectedRows" in result) || result.affectedRows === 0) {
+      await connection.rollback();
+      return false;
+    }
+    const updatedAt = await findUpdatedAt(connection, "posts", postId);
+    await connection.commit();
+    return updatedAt ?? false;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }

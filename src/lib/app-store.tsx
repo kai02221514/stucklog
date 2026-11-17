@@ -91,14 +91,14 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         return project.id;
       },
       async updateProjectTechnologies(projectId, technologies) {
-        await requestJson(`/api/projects/${encodeURIComponent(projectId)}`, {
+        const { updatedAt } = await requestJson<{ updatedAt: string }>(`/api/projects/${encodeURIComponent(projectId)}`, {
           method: "PATCH",
           body: JSON.stringify({ technologies }),
         });
         setProjects((current) =>
           current.map((project) =>
             project.id === projectId
-              ? { ...project, technologies, updatedLabel: "たった今" }
+              ? { ...project, technologies, updatedAt }
               : project,
           ),
         );
@@ -112,7 +112,7 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
         return post.id;
       },
       async updatePost(postId, input) {
-        await requestJson(`/api/posts/${encodeURIComponent(postId)}`, {
+        const { updatedAt } = await requestJson<{ updatedAt: string }>(`/api/posts/${encodeURIComponent(postId)}`, {
           method: "PATCH",
           body: JSON.stringify(input),
         });
@@ -124,19 +124,20 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
                   ...post,
                   ...input,
                   summary: normalized.length > 70 ? `${normalized.slice(0, 70)}…` : normalized,
+                  updatedAt,
                 }
               : post,
           ),
         );
       },
       async resolvePost(postId, resolution) {
-        await requestJson(`/api/posts/${encodeURIComponent(postId)}`, {
+        const { updatedAt } = await requestJson<{ updatedAt: string }>(`/api/posts/${encodeURIComponent(postId)}`, {
           method: "PATCH",
           body: JSON.stringify({ resolution }),
         });
         setPosts((current) =>
           current.map((post) =>
-            post.id === postId ? { ...post, status: "resolved", resolution } : post,
+            post.id === postId ? { ...post, status: "resolved", resolution, updatedAt } : post,
           ),
         );
       },

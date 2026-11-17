@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { TechnologyInput } from "@/components/technology-input";
 import { TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
+import { formatRelativeUpdateTime } from "@/lib/format-relative-time";
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export default function ProjectsPage() {
             <div className="flex items-center gap-3"><h2 className="text-lg font-bold">{project.name}</h2><span className="ml-auto text-xs font-medium text-[#c2410c]">未解決 {openCount}件</span><span className="text-xs font-medium text-[#047857]">解決済み {resolvedCount}件</span></div>
             <p className="text-sm leading-6 text-[#475569]">{project.description}</p>
             <div className="flex gap-2">{project.technologies.map((technology) => <TechnologyTag key={technology}>{technology}</TechnologyTag>)}</div>
-            <p className="mt-auto text-xs text-[#64748b]">最終更新 {project.updatedLabel}</p>
+            <p className="mt-auto text-xs text-[#64748b]">最終更新: {formatRelativeUpdateTime(project.updatedAt)}</p>
           </Link>;
         })}</div> : <div className="mt-6 rounded-lg border border-[#e2e8f0] bg-white px-8 py-14 text-center"><h2 className="font-bold">プロジェクトがありません</h2><p className="mt-2 text-sm text-[#64748b]">最初のプロジェクトを作成すると、チームのつまずきを記録できます。</p></div>}
       </main>

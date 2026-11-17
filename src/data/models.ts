@@ -3,7 +3,7 @@ export type Project = {
   name: string;
   description: string;
   technologies: string[];
-  updatedLabel: string;
+  updatedAt: string;
 };
 
 export type PostStatus = "open" | "resolved";
@@ -18,5 +18,5 @@ export type Post = {
   status: PostStatus;
   resolution?: string;
   author: string;
-  createdLabel: string;
+  updatedAt: string;
 };
