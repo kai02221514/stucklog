@@ -28,20 +28,19 @@
 
 ## ローカル起動
 
-MySQL 8.0互換のデータベースを用意し、テーブルと初期データを作成します。
+Docker Desktopを起動して、ローカル開発用MySQLを作成します。初回起動時にテーブルと初期データも自動作成されます。
 
 ```bash
-mysql -u root -p < database/schema.sql
-mysql -u root -p stucklog < database/seed.sql
+npm run db:up
 ```
 
-環境変数を作成します。
+ローカル用の環境変数を作成します（初回のみ）。
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
-`.env.local` の接続情報をローカルMySQLに合わせて変更し、アプリを起動します。
+アプリを起動します。
 
 ```bash
 npm install
@@ -49,6 +48,8 @@ npm run dev
 ```
 
 ブラウザで `http://localhost:3000` を開いてください。
+
+MySQLを停止する場合は `npm run db:down`、初期データから作り直す場合は `npm run db:reset` を実行します。ローカル用MySQLは `127.0.0.1:3307` だけで待ち受けるため、AWS上のRDSには接続しません。
 
 ## 主な画面
 
