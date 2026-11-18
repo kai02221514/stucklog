@@ -123,6 +123,65 @@ sudo journalctl -u stucklog -o cat --since '30 minutes ago' | grep '"event":"api
 4. 400、404、500などのエラー増加をログから確認できるか
 5. ログに本文や認証情報が含まれていないか
 
+## API入力のセキュリティ強化
+
+APIでJSONを読み込む前に、`Content-Type`と受信バイト数を検証します。JSONリクエスト全体の上限は64KiBです。
+
+| 条件 | HTTPステータス |
+| --- | --- |
+| JSONの構文が壊れている | 400 Bad Request |
+| 必須項目、文字数、タグ件数が不正 | 400 Bad Request |
+| JSONリクエストが64KiBを超える | 413 Payload Too Large |
+| `Content-Type`が`application/json`ではない | 415 Unsupported Media Type |
+
+入力値には次の上限を設けます。ブラウザ画面にも同じ上限を設定しますが、直接APIを呼び出した場合に備えてサーバー側で必ず再検証します。
+
+| 項目 | 上限 |
+| --- | --- |
+| プロジェクト名 | 100文字 |
+| プロジェクト説明 | 500文字 |
+| 投稿タイトル | 200文字 |
+| 投稿本文 | 10,000文字 |
+| 判断・対応メモ | 5,000文字 |
+| 技術タグ | 1件50文字、最大8件 |
+| プロジェクト・投稿ID | 100文字 |
+
+壊れたJSONが500ではなく400になることは、次のコマンドで確認できます。
+
+```bash
+curl -i -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{' \
+  http://localhost:3000/api/projects
+```
+
+同じ技術タグの大文字・小文字違いも重複として400で拒否します。
+
+```bash
+curl -i -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"test","description":"test","technologies":["AWS","aws"]}' \
+  http://localhost:3000/api/projects
+```
+
+## セキュリティヘッダー
+
+全レスポンスに次のヘッダーを設定します。
+
+- `Content-Security-Policy`: 埋め込み、フォーム送信先、`object`要素などを制限
+- `Permissions-Policy`: カメラ、マイク、位置情報を無効化
+- `Referrer-Policy`: 外部サイトへ送る参照元情報を制限
+- `X-Content-Type-Options`: MIMEタイプ推測を無効化
+- `X-Frame-Options`: iframeへの埋め込みを拒否
+
+確認方法:
+
+```bash
+curl -I http://localhost:3000
+```
+
+現在のEC2構成はHTTPで直接公開しているため、HTTPS通信を強制する`Strict-Transport-Security`は設定しません。HTTPS化したあとに追加を検討します。
+
 ## 今後の強化候補
 
 - HTTPS化
