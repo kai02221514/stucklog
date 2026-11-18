@@ -1,6 +1,6 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
 import { apiError, hasTechnologies, invalid } from "@/lib/server/http";
-import { updateProjectTechnologies } from "@/lib/server/repository";
+import { deleteProject, updateProjectTechnologies } from "@/lib/server/repository";
 
 export async function PATCH(
   request: Request,
@@ -20,6 +20,24 @@ export async function PATCH(
         return Response.json({ error: "プロジェクトが見つかりません。" }, { status: 404 });
       }
       return Response.json({ technologies: input.technologies, updatedAt });
+    } catch (error) {
+      return apiError(error, requestId);
+    }
+  });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ projectId: string }> },
+) {
+  return withApiAccessLog(request, async ({ requestId }) => {
+    try {
+      const { projectId } = await params;
+      const deleted = await deleteProject(projectId);
+      if (!deleted) {
+        return Response.json({ error: "プロジェクトが見つかりません。" }, { status: 404 });
+      }
+      return Response.json({ deleted: true });
     } catch (error) {
       return apiError(error, requestId);
     }

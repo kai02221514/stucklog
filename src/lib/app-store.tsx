@@ -13,9 +13,11 @@ type AppStore = {
   posts: Post[];
   createProject: (input: NewProject) => Promise<string>;
   updateProjectTechnologies: (projectId: string, technologies: string[]) => Promise<void>;
+  deleteProject: (projectId: string) => Promise<void>;
   createPost: (input: NewPost) => Promise<string>;
   updatePost: (postId: string, input: PostUpdate) => Promise<void>;
   updatePostStatus: (postId: string, status: PostStatus, resolution: string) => Promise<void>;
+  deletePost: (postId: string) => Promise<void>;
 };
 
 const AppStoreContext = createContext<AppStore | null>(null);
@@ -103,6 +105,13 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
           ),
         );
       },
+      async deleteProject(projectId) {
+        await requestJson<{ deleted: true }>(`/api/projects/${encodeURIComponent(projectId)}`, {
+          method: "DELETE",
+        });
+        setProjects((current) => current.filter((project) => project.id !== projectId));
+        setPosts((current) => current.filter((post) => post.projectId !== projectId));
+      },
       async createPost(input) {
         const { post } = await requestJson<{ post: Post }>("/api/posts", {
           method: "POST",
@@ -142,6 +151,12 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
               : post,
           ),
         );
+      },
+      async deletePost(postId) {
+        await requestJson<{ deleted: true }>(`/api/posts/${encodeURIComponent(postId)}`, {
+          method: "DELETE",
+        });
+        setPosts((current) => current.filter((post) => post.id !== postId));
       },
     }),
     [posts, projects],

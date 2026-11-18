@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FilterSelect, type SelectOption } from "@/components/filter-select";
+import { Pagination } from "@/components/pagination";
 import { SiteHeader } from "@/components/site-header";
 import { EmptyState, ProjectTag, StatusTag, TechnologyTag } from "@/components/ui";
 import { KNOWLEDGE_STATUSES, POST_STATUS_LABELS, type PostStatus } from "@/data/models";
@@ -88,13 +89,7 @@ export default function KnowledgePage() {
                 </Link>;
               })}
             </div>
-            {totalPages > 1 ? (
-              <nav aria-label="ナレッジ一覧のページ" className="mt-6 flex items-center justify-center gap-2">
-                <button type="button" onClick={() => setCurrentPage(Math.max(1, displayedPage - 1))} disabled={displayedPage === 1} className="h-9 rounded-md border border-[#cbd5e1] bg-white px-3 text-sm font-medium text-[#475569] transition hover:border-[#94a3b8] disabled:cursor-not-allowed disabled:opacity-40">前へ</button>
-                {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => <button key={page} type="button" aria-current={displayedPage === page ? "page" : undefined} onClick={() => setCurrentPage(page)} className={`size-9 rounded-md border text-sm font-medium transition ${displayedPage === page ? "border-[#2563eb] bg-[#2563eb] text-white" : "border-[#cbd5e1] bg-white text-[#475569] hover:border-[#94a3b8]"}`}>{page}</button>)}
-                <button type="button" onClick={() => setCurrentPage(Math.min(totalPages, displayedPage + 1))} disabled={displayedPage === totalPages} className="h-9 rounded-md border border-[#cbd5e1] bg-white px-3 text-sm font-medium text-[#475569] transition hover:border-[#94a3b8] disabled:cursor-not-allowed disabled:opacity-40">次へ</button>
-              </nav>
-            ) : null}
+            <Pagination ariaLabel="ナレッジ一覧のページ" currentPage={displayedPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </>
         ) : (
           <div className="mt-5"><EmptyState title="該当する投稿がありません" description="検索語または絞り込み条件を変更してください。" action={<button type="button" onClick={() => { setQuery(""); setProjectId("all"); setStatus("all"); setTechnology("all"); }} className="text-sm font-medium text-[#1d4ed8]">検索条件をクリア</button>} /></div>
