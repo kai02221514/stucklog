@@ -9,14 +9,13 @@ import { SiteHeader } from "@/components/site-header";
 import { TechnologyInput } from "@/components/technology-input";
 import { EmptyState, PostCard, TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
-import type { PostStatus } from "@/data/models";
+import { POST_STATUSES, POST_STATUS_LABELS, type PostStatus } from "@/data/models";
 
 type StatusFilter = "all" | PostStatus;
 
 const statusOptions: SelectOption<StatusFilter>[] = [
   { value: "all", label: "すべて" },
-  { value: "open", label: "未解決" },
-  { value: "resolved", label: "解決済み" },
+  ...POST_STATUSES.map((value) => ({ value, label: POST_STATUS_LABELS[value] })),
 ];
 
 function ProjectPageContent() {

@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS posts (
   title VARCHAR(200) NOT NULL,
   content TEXT NOT NULL,
   summary VARCHAR(300) NOT NULL,
-  status ENUM('open', 'resolved') NOT NULL DEFAULT 'open',
+  status ENUM('open', 'resolved', 'on_hold', 'not_cost_effective', 'external_dependency') NOT NULL DEFAULT 'open',
   resolution TEXT NULL,
   author VARCHAR(100) NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

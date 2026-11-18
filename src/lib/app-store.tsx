@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
-import type { Post, Project } from "@/data/models";
+import type { Post, PostStatus, Project } from "@/data/models";
 
 type NewProject = Pick<Project, "name" | "description" | "technologies">;
 type NewPost = Pick<Post, "projectId" | "title" | "content" | "technologies">;
@@ -15,7 +15,7 @@ type AppStore = {
   updateProjectTechnologies: (projectId: string, technologies: string[]) => Promise<void>;
   createPost: (input: NewPost) => Promise<string>;
   updatePost: (postId: string, input: PostUpdate) => Promise<void>;
-  resolvePost: (postId: string, resolution: string) => Promise<void>;
+  updatePostStatus: (postId: string, status: PostStatus, resolution: string) => Promise<void>;
 };
 
 const AppStoreContext = createContext<AppStore | null>(null);
@@ -130,14 +130,16 @@ export function AppStoreProvider({ children }: { children: React.ReactNode }) {
           ),
         );
       },
-      async resolvePost(postId, resolution) {
-        const { updatedAt } = await requestJson<{ updatedAt: string }>(`/api/posts/${encodeURIComponent(postId)}`, {
+      async updatePostStatus(postId, status, resolution) {
+        const result = await requestJson<{ status: PostStatus; resolution?: string; updatedAt: string }>(`/api/posts/${encodeURIComponent(postId)}`, {
           method: "PATCH",
-          body: JSON.stringify({ resolution }),
+          body: JSON.stringify({ status, resolution }),
         });
         setPosts((current) =>
           current.map((post) =>
-            post.id === postId ? { ...post, status: "resolved", resolution, updatedAt } : post,
+            post.id === postId
+              ? { ...post, status: result.status, resolution: result.resolution, updatedAt: result.updatedAt }
+              : post,
           ),
         );
       },

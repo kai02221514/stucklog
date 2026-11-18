@@ -2,7 +2,7 @@ import "server-only";
 
 import { randomUUID } from "node:crypto";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
-import type { Post, Project } from "@/data/models";
+import type { Post, PostStatus, Project } from "@/data/models";
 import { getPool } from "@/lib/server/db";
 
 type ProjectRow = RowDataPacket & {
@@ -255,14 +255,18 @@ export async function updatePost(postId: string, input: PostUpdate) {
   }
 }
 
-export async function resolvePost(postId: string, resolution: string) {
+export async function updatePostStatus(
+  postId: string,
+  status: PostStatus,
+  resolution: string | null,
+) {
   const connection = await getPool().getConnection();
 
   try {
     await connection.beginTransaction();
     const [result] = await connection.execute(
-      "UPDATE posts SET status = 'resolved', resolution = ? WHERE id = ?",
-      [resolution, postId],
+      "UPDATE posts SET status = ?, resolution = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [status, resolution, postId],
     );
     if (!("affectedRows" in result) || result.affectedRows === 0) {
       await connection.rollback();

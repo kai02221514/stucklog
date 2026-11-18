@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Post } from "@/data/models";
+import { POST_STATUS_LABELS, type Post } from "@/data/models";
 import { formatRelativeUpdateTime } from "@/lib/format-relative-time";
 
 export function TechnologyTag({ children }: { children: React.ReactNode }) {
@@ -7,10 +7,18 @@ export function TechnologyTag({ children }: { children: React.ReactNode }) {
 }
 
 export function StatusTag({ status }: { status: Post["status"] }) {
-  return status === "resolved" ? (
-    <span className="inline-flex rounded-full border border-[#a7f3d0] bg-[#ecfdf5] px-2.5 py-1 text-xs font-medium text-[#047857]">解決済み</span>
-  ) : (
-    <span className="inline-flex rounded-full border border-[#fed7aa] bg-[#fff7ed] px-2.5 py-1 text-xs font-medium text-[#c2410c]">未解決</span>
+  const colorClass = {
+    open: "border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]",
+    resolved: "border-[#a7f3d0] bg-[#ecfdf5] text-[#047857]",
+    on_hold: "border-[#fde68a] bg-[#fffbeb] text-[#a16207]",
+    not_cost_effective: "border-[#ddd6fe] bg-[#f5f3ff] text-[#6d28d9]",
+    external_dependency: "border-[#bae6fd] bg-[#f0f9ff] text-[#0369a1]",
+  }[status];
+
+  return (
+    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${colorClass}`}>
+      {POST_STATUS_LABELS[status]}
+    </span>
   );
 }
 

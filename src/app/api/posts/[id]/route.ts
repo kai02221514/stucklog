@@ -1,6 +1,7 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
+import { isPostStatus } from "@/data/models";
 import { apiError, hasStrings, hasTechnologies, invalid } from "@/lib/server/http";
-import { resolvePost, updatePost } from "@/lib/server/repository";
+import { updatePost, updatePostStatus } from "@/lib/server/repository";
 
 export async function PATCH(
   request: Request,
@@ -11,13 +12,27 @@ export async function PATCH(
       const input: unknown = await request.json();
       const { id } = await params;
 
-      if (hasStrings(input, ["resolution"])) {
-        if (!input.resolution.trim()) return invalid("解決メモを入力してください。");
-        const updatedAt = await resolvePost(id, input.resolution.trim());
+      if (typeof input === "object" && input !== null && "status" in input) {
+        if (!hasStrings(input, ["status"])) {
+          return invalid("有効なステータスを選択してください。");
+        }
+        const status = (input as Record<string, string>).status;
+        if (!isPostStatus(status)) {
+          return invalid("有効なステータスを選択してください。");
+        }
+        const resolution = hasStrings(input, ["resolution"]) ? input.resolution.trim() : "";
+        if (status !== "open" && !resolution) {
+          return invalid("判断・対応メモを入力してください。");
+        }
+        const updatedAt = await updatePostStatus(id, status, resolution || null);
         if (!updatedAt) {
           return Response.json({ error: "投稿が見つかりません。" }, { status: 404 });
         }
-        return Response.json({ status: "resolved", resolution: input.resolution.trim(), updatedAt });
+        return Response.json({
+          status,
+          resolution: resolution || undefined,
+          updatedAt,
+        });
       }
 
       if (!hasStrings(input, ["title", "content"]) || !hasTechnologies(input)) {

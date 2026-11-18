@@ -13,7 +13,7 @@ export function SiteHeader({ active = "projects" }: SiteHeaderProps) {
         <div className="w-3" />
         <nav aria-label="メインナビゲーション" className="flex items-center gap-1">
           <Link href="/" className={navClass(active === "projects")}>プロジェクト</Link>
-          <Link href="/knowledge" className={navClass(active === "knowledge")}>解決済みナレッジ</Link>
+          <Link href="/knowledge" className={navClass(active === "knowledge")}>ナレッジ</Link>
         </nav>
       </div>
     </header>
