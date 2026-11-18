@@ -1,5 +1,7 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
-import { apiError, hasStrings, hasTechnologies, invalid } from "@/lib/server/http";
+import { INPUT_LIMITS } from "@/lib/input-limits";
+import { apiError, invalid } from "@/lib/server/http";
+import { asRecord, readJsonBody, requiredString, technologies } from "@/lib/server/request-validation";
 import { createPost, listPosts } from "@/lib/server/repository";
 
 export async function GET(request: Request) {
@@ -15,19 +17,27 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return withApiAccessLog(request, async ({ requestId }) => {
     try {
-      const input: unknown = await request.json();
-      if (!hasStrings(input, ["projectId", "title", "content"]) || !hasTechnologies(input)) {
+      const parsed = await readJsonBody(request);
+      if (!parsed.ok) return parsed.response;
+      const input = asRecord(parsed.value);
+      if (!input) {
         return invalid("プロジェクト、タイトル、内容、技術タグを入力してください。");
       }
-      if (!input.projectId.trim() || !input.title.trim() || !input.content.trim()) {
-        return invalid("プロジェクト、タイトル、内容を入力してください。");
-      }
+
+      const projectId = requiredString(input.projectId, "プロジェクト", INPUT_LIMITS.projectId);
+      if (!projectId.ok) return projectId.response;
+      const title = requiredString(input.title, "タイトル", INPUT_LIMITS.postTitle);
+      if (!title.ok) return title.response;
+      const content = requiredString(input.content, "内容", INPUT_LIMITS.postContent);
+      if (!content.ok) return content.response;
+      const technologyList = technologies(input.technologies);
+      if (!technologyList.ok) return technologyList.response;
 
       const post = await createPost({
-        projectId: input.projectId,
-        title: input.title.trim(),
-        content: input.content.trim(),
-        technologies: input.technologies.map((item) => item.trim()),
+        projectId: projectId.value,
+        title: title.value,
+        content: content.value,
+        technologies: technologyList.value,
       });
       return Response.json({ post }, { status: 201 });
     } catch (error) {

@@ -1,5 +1,7 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
-import { apiError, hasStrings, hasTechnologies, invalid } from "@/lib/server/http";
+import { INPUT_LIMITS } from "@/lib/input-limits";
+import { apiError, invalid } from "@/lib/server/http";
+import { asRecord, readJsonBody, requiredString, technologies } from "@/lib/server/request-validation";
 import { createProject, listProjects } from "@/lib/server/repository";
 
 export async function GET(request: Request) {
@@ -15,18 +17,28 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return withApiAccessLog(request, async ({ requestId }) => {
     try {
-      const input: unknown = await request.json();
-      if (!hasStrings(input, ["name", "description"]) || !hasTechnologies(input)) {
+      const parsed = await readJsonBody(request);
+      if (!parsed.ok) return parsed.response;
+      const input = asRecord(parsed.value);
+      if (!input) {
         return invalid("プロジェクト名、説明、使用技術を入力してください。");
       }
-      if (!input.name.trim() || !input.description.trim()) {
-        return invalid("プロジェクト名と説明を入力してください。");
-      }
+
+      const name = requiredString(input.name, "プロジェクト名", INPUT_LIMITS.projectName);
+      if (!name.ok) return name.response;
+      const description = requiredString(
+        input.description,
+        "プロジェクトの説明",
+        INPUT_LIMITS.projectDescription,
+      );
+      if (!description.ok) return description.response;
+      const technologyList = technologies(input.technologies);
+      if (!technologyList.ok) return technologyList.response;
 
       const project = await createProject({
-        name: input.name.trim(),
-        description: input.description.trim(),
-        technologies: input.technologies.map((item) => item.trim()),
+        name: name.value,
+        description: description.value,
+        technologies: technologyList.value,
       });
       return Response.json({ project }, { status: 201 });
     } catch (error) {

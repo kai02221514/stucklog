@@ -1,5 +1,7 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
-import { apiError, hasTechnologies, invalid } from "@/lib/server/http";
+import { INPUT_LIMITS } from "@/lib/input-limits";
+import { apiError } from "@/lib/server/http";
+import { asRecord, readJsonBody, requiredString, technologies } from "@/lib/server/request-validation";
 import { deleteProject, updateProjectTechnologies } from "@/lib/server/repository";
 
 export async function PATCH(
@@ -8,18 +10,27 @@ export async function PATCH(
 ) {
   return withApiAccessLog(request, async ({ requestId }) => {
     try {
-      const input: unknown = await request.json();
-      if (!hasTechnologies(input)) return invalid("使用技術を1件以上入力してください。");
+      const parsed = await readJsonBody(request);
+      if (!parsed.ok) return parsed.response;
+      const input = asRecord(parsed.value);
+      const technologyList = technologies(input?.technologies);
+      if (!technologyList.ok) return technologyList.response;
 
       const { projectId } = await params;
-      const updatedAt = await updateProjectTechnologies(
+      const validatedProjectId = requiredString(
         projectId,
-        input.technologies.map((item) => item.trim()),
+        "プロジェクトID",
+        INPUT_LIMITS.projectId,
+      );
+      if (!validatedProjectId.ok) return validatedProjectId.response;
+      const updatedAt = await updateProjectTechnologies(
+        validatedProjectId.value,
+        technologyList.value,
       );
       if (!updatedAt) {
         return Response.json({ error: "プロジェクトが見つかりません。" }, { status: 404 });
       }
-      return Response.json({ technologies: input.technologies, updatedAt });
+      return Response.json({ technologies: technologyList.value, updatedAt });
     } catch (error) {
       return apiError(error, requestId);
     }
@@ -33,7 +44,13 @@ export async function DELETE(
   return withApiAccessLog(request, async ({ requestId }) => {
     try {
       const { projectId } = await params;
-      const deleted = await deleteProject(projectId);
+      const validatedProjectId = requiredString(
+        projectId,
+        "プロジェクトID",
+        INPUT_LIMITS.projectId,
+      );
+      if (!validatedProjectId.ok) return validatedProjectId.response;
+      const deleted = await deleteProject(validatedProjectId.value);
       if (!deleted) {
         return Response.json({ error: "プロジェクトが見つかりません。" }, { status: 404 });
       }
