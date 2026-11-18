@@ -19,7 +19,7 @@ function normalizeUserAgent(value: string | null) {
   if (!value) return null;
 
   const normalized = value
-    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029\u202a-\u202e\u2066-\u2069]/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, MAX_USER_AGENT_LENGTH);
