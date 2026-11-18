@@ -4,11 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Modal } from "@/components/modal";
+import { Pagination } from "@/components/pagination";
 import { SiteHeader } from "@/components/site-header";
 import { TechnologyInput } from "@/components/technology-input";
 import { TechnologyTag } from "@/components/ui";
 import { useAppStore } from "@/lib/app-store";
 import { formatRelativeUpdateTime } from "@/lib/format-relative-time";
+
+const PAGE_SIZE = 5;
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -19,6 +22,10 @@ export default function ProjectsPage() {
   const [technologies, setTechnologies] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(projects.length / PAGE_SIZE));
+  const displayedPage = Math.min(currentPage, totalPages);
+  const visibleProjects = projects.slice((displayedPage - 1) * PAGE_SIZE, displayedPage * PAGE_SIZE);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -47,7 +54,7 @@ export default function ProjectsPage() {
           <button type="button" onClick={() => setShowCreate(true)} className="ml-auto h-[42px] w-[188px] rounded-md bg-[#2563eb] text-sm font-medium text-white hover:bg-[#1d4ed8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563eb] focus-visible:ring-offset-2">新しいプロジェクト</button>
         </div>
 
-        {projects.length > 0 ? <div className="mt-6 flex flex-col gap-3">{projects.map((project) => {
+        {projects.length > 0 ? <><div className="mt-6 flex flex-col gap-3">{visibleProjects.map((project) => {
           const projectPosts = posts.filter((post) => post.projectId === project.id);
           const openCount = projectPosts.filter((post) => post.status === "open").length;
           const resolvedCount = projectPosts.filter((post) => post.status === "resolved").length;
@@ -58,7 +65,7 @@ export default function ProjectsPage() {
             <div className="flex gap-2">{project.technologies.map((technology) => <TechnologyTag key={technology}>{technology}</TechnologyTag>)}</div>
             <p className="mt-auto text-xs text-[#64748b]">最終更新: {formatRelativeUpdateTime(project.updatedAt)}</p>
           </Link>;
-        })}</div> : <div className="mt-6 rounded-lg border border-[#e2e8f0] bg-white px-8 py-14 text-center"><h2 className="font-bold">プロジェクトがありません</h2><p className="mt-2 text-sm text-[#64748b]">最初のプロジェクトを作成すると、チームのつまずきを記録できます。</p></div>}
+        })}</div><Pagination ariaLabel="プロジェクト一覧のページ" currentPage={displayedPage} totalPages={totalPages} onPageChange={setCurrentPage} /></> : <div className="mt-6 rounded-lg border border-[#e2e8f0] bg-white px-8 py-14 text-center"><h2 className="font-bold">プロジェクトがありません</h2><p className="mt-2 text-sm text-[#64748b]">最初のプロジェクトを作成すると、チームのつまずきを記録できます。</p></div>}
       </main>
 
       {showCreate ? <Modal title="新しいプロジェクト" description="使用する技術と目的を登録します。" onClose={() => setShowCreate(false)}><form onSubmit={submit} className="space-y-5">
