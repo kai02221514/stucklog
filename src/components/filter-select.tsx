@@ -20,17 +20,24 @@ export function FilterSelect<T extends string>({
   options,
   value,
   onChange,
+  mode = "filter",
 }: {
   label: string;
   options: SelectOption<T>[];
   value: T;
   onChange: (value: T) => void;
+  mode?: "filter" | "select";
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value) ?? options[0];
   const isUnfiltered = value === "all";
-  const displayValue = isUnfiltered ? label : `${label}：${selected.label}`;
+  const displayValue = mode === "select" ? selected.label : isUnfiltered ? label : `${label}：${selected.label}`;
+  const buttonLabel = mode === "select"
+    ? `${label}を選択：${selected.label}`
+    : isUnfiltered
+      ? `${label}で絞り込む`
+      : `${label}で絞り込む：${selected.label}`;
 
   useEffect(() => {
     if (!open) return;
@@ -52,7 +59,7 @@ export function FilterSelect<T extends string>({
     <div ref={rootRef} className="relative min-w-0 flex-1">
       <button
         type="button"
-        aria-label={isUnfiltered ? `${label}で絞り込む` : `${label}で絞り込む：${selected.label}`}
+        aria-label={buttonLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
