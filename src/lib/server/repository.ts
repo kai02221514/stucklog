@@ -160,6 +160,14 @@ export async function updateProjectTechnologies(
   }
 }
 
+export async function deleteProject(projectId: string) {
+  const [result] = await getPool().execute(
+    "DELETE FROM projects WHERE id = ?",
+    [projectId],
+  );
+  return "affectedRows" in result && result.affectedRows > 0;
+}
+
 export async function listPosts(): Promise<Post[]> {
   const pool = getPool();
   const [postRows] = await pool.query<PostRow[]>(
@@ -281,4 +289,12 @@ export async function updatePostStatus(
   } finally {
     connection.release();
   }
+}
+
+export async function deletePost(postId: string) {
+  const [result] = await getPool().execute(
+    "DELETE FROM posts WHERE id = ?",
+    [postId],
+  );
+  return "affectedRows" in result && result.affectedRows > 0;
 }

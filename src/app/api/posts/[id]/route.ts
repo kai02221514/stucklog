@@ -1,7 +1,7 @@
 import { withApiAccessLog } from "@/lib/server/access-log";
 import { isPostStatus } from "@/data/models";
 import { apiError, hasStrings, hasTechnologies, invalid } from "@/lib/server/http";
-import { updatePost, updatePostStatus } from "@/lib/server/repository";
+import { deletePost, updatePost, updatePostStatus } from "@/lib/server/repository";
 
 export async function PATCH(
   request: Request,
@@ -50,6 +50,24 @@ export async function PATCH(
         return Response.json({ error: "投稿が見つかりません。" }, { status: 404 });
       }
       return Response.json({ updated: true, updatedAt });
+    } catch (error) {
+      return apiError(error, requestId);
+    }
+  });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  return withApiAccessLog(request, async ({ requestId }) => {
+    try {
+      const { id } = await params;
+      const deleted = await deletePost(id);
+      if (!deleted) {
+        return Response.json({ error: "投稿が見つかりません。" }, { status: 404 });
+      }
+      return Response.json({ deleted: true });
     } catch (error) {
       return apiError(error, requestId);
     }
